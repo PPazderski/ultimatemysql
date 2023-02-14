@@ -2,7 +2,7 @@
 /**
  * Ultimate MySQL Wrapper Class
  *
- * @version 4.2
+ * @version 4.4
  * @link https://github.com/ricci69/ultimatemysql/
  *
  * Code up to the version 3.0
@@ -1630,7 +1630,7 @@ class MySQL
 			case "string":
 			case "varchar":
 			case "char":
-				if (strlen($value) == 0) {
+				if (is_null($value) || strlen($value) == 0) {
 					$return_value = "NULL";
 				} else {
 					$value = stripslashes($value);
