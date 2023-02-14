@@ -45,7 +45,7 @@ mysql -uroot -p < tests/db.sql
 after this, you can use PHPUnit
 
 ```console
-user@pc:/var/www/html/ultimatemysql$ composer update
+user@pc:/var/www/html/ultimatemysql$ composer install
 user@pc:/var/www/html/ultimatemysql$ ./vendor/bin/phpunit --testdox tests
 ```
 
