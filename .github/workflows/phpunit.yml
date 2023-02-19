@@ -49,3 +49,13 @@ jobs:
     - name: Test the code
       run: |
         ./vendor/bin/phpunit --testdox tests       
+
+    -   name: 'Run tests with coverage'
+        run: phpdbg -qrr vendor/bin/phpunit --coverage-clover coverage/clover.xml
+
+    -   name: 'Send Coverage'
+        continue-on-error: true
+        timeout-minutes: 1
+        run: |
+            wget https://scrutinizer-ci.com/ocular.phar
+            php ocular.phar code-coverage:upload --format=php-clover coverage/clover.xml
