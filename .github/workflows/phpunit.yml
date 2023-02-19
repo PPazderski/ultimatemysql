@@ -30,13 +30,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3       
     
-    -   name: 'Setup PHP'
-        uses: shivammathur/setup-php@v2
-        with:
-            coverage: 'none'
-            extensions: 'json'
-            php-version: '${{ matrix.php-versions }}'    
-    
     - name: Verify MySQL connection from host
       run: |
         sudo apt-get install -y mysql-client
@@ -46,21 +39,13 @@ jobs:
       run: |
         mysql --host 127.0.0.1 --port 3306 -uroot -proot < ./tests/db.sql
         
-    -   name: 'Install Composer dependencies'
-        uses: ramsey/composer-install@v1
-        with:
-            composer-options: '--prefer-dist'
+    - name: Compose setup
+      run: |
+        composer validate
+        composer check-platform-reqs
+        # if a package requires php: ^7, then the option --ignore-platform-req=php+ would allow installing on PHP8
+        composer install --no-interaction --ignore-platform-req=php+
         
     - name: Test the code
       run: |
         ./vendor/bin/phpunit --testdox tests       
-
-    -   name: 'Run tests with coverage'
-        run: phpdbg -qrr vendor/bin/phpunit --coverage-clover coverage/clover.xml
-
-    -   name: 'Send Coverage'
-        continue-on-error: true
-        timeout-minutes: 1
-        run: |
-            wget https://scrutinizer-ci.com/ocular.phar
-            php ocular.phar code-coverage:upload --format=php-clover coverage/clover.xml
