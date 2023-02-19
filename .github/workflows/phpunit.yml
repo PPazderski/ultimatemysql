@@ -35,7 +35,7 @@ jobs:
         with:
             coverage: 'none'
             extensions: 'json'
-            php-version: '${{ matrix.php-version }}'    
+            php-version: '${{ matrix.php-versions }}'    
     
     - name: Verify MySQL connection from host
       run: |
