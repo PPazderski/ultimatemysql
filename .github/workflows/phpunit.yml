@@ -42,7 +42,6 @@ jobs:
     - name: Compose setup
       run: |
         composer validate
-        # For the moment, I remove the check-platform-reqs that require the composer.lock file
         # composer check-platform-reqs
         # if a package requires php: ^7, then the option --ignore-platform-req=php+ would allow installing on PHP8
         composer install --no-interaction --ignore-platform-req=php+
@@ -62,19 +61,28 @@ jobs:
             php-version:
                 - '7.4'
 
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+        - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3                
+                
     steps:
         -   name: 'Checkout code'
             uses: actions/checkout@v2
 
-        - name: Verify MySQL connection from host
-        run: |
-            sudo apt-get install -y mysql-client
-            mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "SHOW DATABASES"
+        -   name: Verify MySQL connection from host
+            run: |
+                sudo apt-get install -y mysql-client
+                mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "SHOW DATABASES"
 
-        - name: Import MySQL test DB
-        run: |
-            mysql --host 127.0.0.1 --port 3306 -uroot -proot < ./tests/db.sql            
-            
+        -   name: Import MySQL test DB
+            run: |
+                mysql --host 127.0.0.1 --port 3306 -uroot -proot < ./tests/db.sql
+        
         -   name: 'Setup PHP'
             uses: shivammathur/setup-php@v2
             with:
