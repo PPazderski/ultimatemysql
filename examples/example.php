@@ -1,4 +1,4 @@
-<?
+<?php
 include("mysql.class.php");
 
 $db = new MySQL();
@@ -117,4 +117,3 @@ echo MySQL::SQLValue(123, MySQL::SQLVALUE_NUMBER) . "<br />\n";
 echo MySQL::SQLBooleanValue(false, "1", "0", MySQL::SQLVALUE_NUMBER);
 echo MySQL::SQLBooleanValue("ON", "Ya", "Nope");
 echo MySQL::SQLBooleanValue(1, '+', '-');
-?>

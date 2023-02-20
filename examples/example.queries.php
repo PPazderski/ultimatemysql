@@ -208,4 +208,3 @@ try {
 }
 
 // There are so many different ways to use the Ultimate MySQL class!
-?>

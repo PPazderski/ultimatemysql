@@ -5,7 +5,7 @@ $db = new MySQL();
 
 // Connect to the database
 // CHANGE THESE VALUES TO MATCH YOUR DATABASE!
-if (! $db->Open(true, "test", "localhost", "root", "password")) $db->Kill();
+if (! $db->Open("test", "localhost", "root", "password")) $db->Kill();
 
 // --------------------------------------------------------------------------
 // Want to know if you are connected? Use IsConnected()
@@ -72,5 +72,3 @@ try {
 // Or let's show a stack trace if we do not use a try/catch
 // This shows the stack and tells us exactly where it failed
 $db->Query("BAD SQL QUERY TO CREATE AN ERROR");
-
-?>

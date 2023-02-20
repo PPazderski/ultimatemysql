@@ -85,7 +85,7 @@ echo "<hr />\n"; // ---------------------------------------------------------
 // row, the cursor is automatically moved to the next row. Here,
 // we will specify the the first row (0) to reset our position.
 // We will also specify what type of array we want returned.
-$array = $db->RowArray(0, MYSQL_ASSOC);
+$array = $db->RowArray(0, MYSQLI_ASSOC);
 
 // Display the array
 echo "<pre>\n";
@@ -95,12 +95,11 @@ echo "</pre>\n";
 echo "<hr />\n"; // ---------------------------------------------------------
 
 // And now show the individual columns in the array
-echo $array[Color] . " and " . $array[Age] . "<br />\n";
+echo $array["Color"] . " and " . $array["Age"] . "<br />\n";
 
 // Grab the next row as an array. Notice how we didn't specify
 // a row (0) like above? It's completely optional.
 $array = $db->RowArray();
-echo $array[Color] . " and " . $array[Age] . "<br />\n";
+echo $array["Color"] . " and " . $array["Age"] . "<br />\n";
 
 // There are so many different ways to use the Ultimate MySQL class!
-?>
