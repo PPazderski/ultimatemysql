@@ -49,3 +49,47 @@ jobs:
     - name: Test the code
       run: |
         ./vendor/bin/phpunit --testdox tests       
+
+  code-coverage:
+    name: 'Code Coverage - PHP ${{ matrix.php-version }}'
+
+    runs-on: 'ubuntu-latest'
+
+    strategy:
+        fail-fast: false
+        matrix:
+            php-version:
+                - '7.4'
+
+    steps:
+        -   name: 'Checkout code'
+            uses: actions/checkout@v2
+
+        -   name: 'Setup PHP'
+            uses: shivammathur/setup-php@v2
+            with:
+                coverage: 'none'
+                extensions: 'json'
+                php-version: '${{ matrix.php-version }}'
+
+        -   name: 'Display PHP versions'
+            run: |
+                php -r 'foreach (get_loaded_extensions() as $extension) echo $extension . " " . phpversion($extension) . PHP_EOL;'
+                php -i
+        -   name: 'Install Composer dependencies'
+            uses: ramsey/composer-install@v1
+            with:
+                composer-options: '--prefer-dist'
+
+        -   name: 'Display dependencies versions'
+            run: composer show
+
+        -   name: 'Run tests with coverage'
+            run: phpdbg -qrr vendor/bin/phpunit --coverage-clover coverage/clover.xml
+
+        -   name: 'Send Coverage'
+            continue-on-error: true
+            timeout-minutes: 1
+            run: |
+                wget https://scrutinizer-ci.com/ocular.phar
+                php ocular.phar code-coverage:upload --format=php-clover coverage/clover.xml          
