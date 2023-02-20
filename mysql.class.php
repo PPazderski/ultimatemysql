@@ -1124,6 +1124,7 @@ class MySQL
 	public function Query($sql) {
 		$this->ResetError();
 		$this->last_sql = $sql;
+		$this->last_result = false;
 		
         if ($this->debug)
             file_put_contents($this->debug, date("Y-m-d H:i:s")." : ".$sql.PHP_EOL, FILE_APPEND);		
