@@ -1078,13 +1078,21 @@ class MySQL
 		$this->active_row = -1;
 
 		// Open persistent or normal connection
-		if ($pcon) {
-			$this->mysql_link = @mysqli_pconnect(
-				'p:' . $this->db_host, $this->db_user, $this->db_pass);
-		} else {
-			$this->mysql_link = @mysqli_connect (
-				$this->db_host, $this->db_user, $this->db_pass);
-		}
+		try {
+			if ($pcon) {
+				$this->mysql_link = @mysqli_pconnect(
+					'p:' . $this->db_host, $this->db_user, $this->db_pass);
+			} else {
+				$this->mysql_link = @mysqli_connect (
+					$this->db_host, $this->db_user, $this->db_pass);
+			}
+		} catch (mysqli_sql_exception $e) {
+            $this->SetError($e->getMessage(), $e->getCode());
+            $this->last_result = false;
+            $this->last_insert_id = false;
+            return false;
+        }
+        
 		// Connect to mysql server failed?
 		if (! $this->IsConnected()) {
 			$this->SetError();
