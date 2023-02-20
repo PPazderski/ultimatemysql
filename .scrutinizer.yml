@@ -10,6 +10,7 @@ build:
             tests:
                 override:
                     - php-scrutinizer-run
+                    - phpunit tests/BuildTest.php
                     -
                         command: phpcs-run
                         use_website_config: true
