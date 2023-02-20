@@ -7,9 +7,9 @@ build:
             - composer install --ignore-platform-reqs --no-interaction        
     nodes:
         analysis:
-            project_setup:
+            tests:
                 override:
-                    - 'true'
+                    - php-scrutinizer-run
 filter:
     excluded_paths:
         - 'tests/*'
