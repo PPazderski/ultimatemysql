@@ -242,11 +242,11 @@ class MySQL {
      *                          column names as keys and values as data. The
      *                          values must be SQL ready (i.e. quotes around
      *                          strings, formatted dates, ect)
-     * @param array/string $columns (Optional) The column or list of columns to select
-     * @param array/string $sortColumns (Optional) Column or list of columns to sort by
+     * @param array|string $columns (Optional) The column or list of columns to select
+     * @param array|string $sortColumns (Optional) Column or list of columns to sort by
      * @param boolean $sortAscending (Optional) TRUE for ascending; FALSE for descending
      *                               This only works if $sortColumns are specified
-     * @param integer/string $limit (Optional) The limit of rows to return
+     * @param integer|string $limit (Optional) The limit of rows to return
      * @return string Returns a SQL SELECT statement
      */
     static public function BuildSQLSelect($tableName, $whereArray = null, $columns = null,
@@ -1003,7 +1003,7 @@ class MySQL {
     /**
      * [STATIC] Determines if a value of any data type is a date PHP can convert
      *
-     * @param date/string $value
+     * @param date|string $value
      * @return boolean Returns TRUE if value is date or FALSE if not date
      */
     static public function IsDate($value) {
@@ -1528,8 +1528,8 @@ class MySQL {
      *                          column names as keys and values as data. The
      *                          values must be SQL ready (i.e. quotes around
      *                          strings, formatted dates, ect)
-     * @param array/string $columns (Optional) The column or list of columns to select
-     * @param array/string $sortColumns (Optional) Column or list of columns to sort by
+     * @param array|string $columns (Optional) The column or list of columns to select
+     * @param array|string $sortColumns (Optional) Column or list of columns to sort by
      * @param boolean $sortAscending (Optional) TRUE for ascending; FALSE for descending
      *                               This only works if $sortColumns are specified
      * @param integer/string $limit (Optional) The limit of rows to return
