@@ -620,7 +620,7 @@ class MySQL {
      * @param string $column Column name
      * @param string $table (Optional) If a table name is not specified, the
      *                      last returned records are used.
-     * @return integer Field length
+     * @return integer|boolena Field length or FALSE on error
      */
     public function GetColumnLength($column, $table = "") {
         $this->ResetError();
@@ -708,11 +708,11 @@ class MySQL {
      *
      * @param string $table (Optional) If a table name is not specified, the
      *                      last returned records are used
-     * @return array An array that contains the column names
+     * @return array|boolean An array that contains the column names OR FALSE on error
      */
     public function GetColumnNames($table = "") {
         $this->ResetError();
-        $columns = false;
+        $columns = array();
                 
         if (empty($table)) {
             $columnCount = mysqli_field_count($this->mysql_link);
@@ -855,7 +855,7 @@ class MySQL {
      * into an array. If the database does not contains
      * any tables, the returned value is FALSE
      *
-     * @return array An array that contains the table names
+     * @return array|boolean An array that contains the table names or FALSE on error
      */
     public function GetTables() {
         $this->ResetError();
@@ -970,7 +970,7 @@ class MySQL {
      *                            names as keys and values as data. The values
      *                            must be SQL ready (i.e. quotes around
      *                            strings, formatted dates, ect)
-     * @return integer Returns last insert ID on success or FALSE on failure
+     * @return integer|boolean Returns last insert ID on success OR false on failure
      */
     public function InsertRow($tableName, $valuesArray) {
         $this->ResetError();
@@ -1095,7 +1095,7 @@ class MySQL {
         // Open persistent or normal connection
         try {
             if ($pcon) {
-                $this->mysql_link = @mysqli_pconnect(
+                $this->mysql_link = @mysqli_connect(
                                 'p:' . $this->db_host, $this->db_user, $this->db_pass);
             } else {
                 $this->mysql_link = @mysqli_connect(
@@ -1139,7 +1139,7 @@ class MySQL {
      * Executes the given SQL query and returns the records
      *
      * @param string $sql The query string should not end with a semicolon
-     * @return object PHP 'mysql result' resource object containing the records
+     * @return object|boolean PHP 'mysql result' resource object containing the records
      *                on SELECT, SHOW, DESCRIBE or EXPLAIN queries and returns;
      *                TRUE or FALSE for all others i.e. UPDATE, DELETE, DROP
      *                AND FALSE on all errors (setting the local Error message)
@@ -1196,7 +1196,7 @@ class MySQL {
      * @param string $sql The query string should not end with a semicolon
      * @param integer $resultType (Optional) The type of array
      *                Values can be: MYSQLI_ASSOC, MYSQLI_NUM, MYSQLI_BOTH
-     * @return array A multi-dimensional array containing all the data
+     * @return mixed A multi-dimensional array containing all the data
      *               returned from the query or FALSE on all errors
      */
     public function QueryArray($sql, $resultType = MYSQLI_BOTH) {
@@ -1212,7 +1212,7 @@ class MySQL {
      * Executes the given SQL query and returns only one (the first) row
      *
      * @param string $sql The query string should not end with a semicolon
-     * @return object PHP resource object containing the first row or
+     * @return object|boolean PHP resource object containing the first row or
      *                FALSE if no row is returned from the query
      */
     public function QuerySingleRow($sql) {
@@ -1292,7 +1292,7 @@ class MySQL {
      *
      * @param integer $resultType (Optional) The type of array
      *                Values can be: MYSQLI_ASSOC, MYSQLI_NUM, MYSQLI_BOTH
-     * @return Records in array form
+     * @return array|boolean Records in array form or FALSE on no query results
      */
     public function RecordsArray($resultType = MYSQLI_BOTH) {
         $this->ResetError();
@@ -1353,7 +1353,7 @@ class MySQL {
      * PHP object or returns false on error
      *
      * @param integer $optional_row_number (Optional) Use to specify a row
-     * @return object PHP object or FALSE on error
+     * @return object|boolean PHP object or FALSE on error
      */
     public function Row($optional_row_number = null) {
         $this->ResetError();
@@ -1392,7 +1392,7 @@ class MySQL {
      * @param integer $optional_row_number (Optional) Use to specify a row
      * @param integer $resultType (Optional) The type of array
      *                Values can be: MYSQLI_ASSOC, MYSQLI_NUM, MYSQLI_BOTH
-     * @return array Array that corresponds to fetched row or FALSE if no rows
+     * @return array|boolean Array that corresponds to fetched row or FALSE if no rows
      */
     public function RowArray($optional_row_number = null, $resultType = MYSQLI_BOTH) {
         $this->ResetError();
@@ -1427,7 +1427,7 @@ class MySQL {
     /**
      * Returns the last query row count
      *
-     * @return integer Row count or FALSE on error
+     * @return integer|boolean Row count or FALSE on error
      */
     public function RowCount() {
         $this->ResetError();
@@ -1453,7 +1453,7 @@ class MySQL {
      * specified row number and returns the result
      *
      * @param integer $row_number Row number
-     * @return object Fetched row as PHP object
+     * @return object|boolean Fetched row as PHP object or FALSE on failure
      */
     public function Seek($row_number) {
         $this->ResetError();
@@ -1598,7 +1598,7 @@ class MySQL {
             $this->error_number = -999;
         }
         if ($this->ThrowExceptions) {
-            if (isset($this->error_desc) && $this->error_desc != NULL) {
+            if (isset($this->error_desc) && $this->error_desc !== NULL) {
                 throw new Exception($this->error_desc . ' (' . __LINE__ . ')');
             }
         }
@@ -1728,7 +1728,7 @@ class MySQL {
      * Returns last measured duration (time between TimerStart and TimerStop)
      *
      * @param integer $decimals (Optional) The number of decimal places to show
-     * @return Float Microseconds elapsed
+     * @return string Microseconds elapsed in float format
      */
     public function TimerDuration($decimals = 4) {
         return number_format($this->time_diff, $decimals);
