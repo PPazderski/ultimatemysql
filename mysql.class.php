@@ -509,6 +509,7 @@ class MySQL {
                 return false;
             } else {
                 $index = 0;
+                $columns = array();
                 // Fetchs the array to be returned (column 8 is field comment):
                 while ($array_data = mysqli_fetch_array($records)) {
                     if ($resultType == "NUM" || $resultType == "BOTH")
@@ -715,6 +716,8 @@ class MySQL {
      */
     public function GetColumnNames($table = "") {
         $this->ResetError();
+        $columns = false;
+                
         if (empty($table)) {
             $columnCount = mysqli_field_count($this->mysql_link);
             if (!$columnCount) {
@@ -860,6 +863,8 @@ class MySQL {
      */
     public function GetTables() {
         $this->ResetError();
+        $tables = array();
+        
         // Query to get the tables in the current database:
         $records = mysqli_query($this->mysql_link, "SHOW TABLES");
         if (!$records) {
@@ -1295,6 +1300,8 @@ class MySQL {
      */
     public function RecordsArray($resultType = MYSQLI_BOTH) {
         $this->ResetError();
+        $members = array();
+        
         if ($this->last_result) {
 
             if (!is_object($this->last_result))
