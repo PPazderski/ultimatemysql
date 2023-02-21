@@ -457,11 +457,7 @@ class MySQL {
      */
     static public function GetBooleanValue($value) {
         if (gettype($value) == "boolean") {
-            if ($value == true) {
-                return true;
-            } else {
-                return false;
-            }
+            return $value;
         } elseif (is_numeric($value)) {
             if ($value > 0) {
                 return true;
