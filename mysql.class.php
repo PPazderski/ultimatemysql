@@ -123,7 +123,7 @@ class MySQL {
      *                           names as keys and values as data. The values
      *                           must be SQL ready (i.e. quotes around strings,
      *                           formatted dates, ect).
-     * @return boolean Returns TRUE on success or FALSE on error
+     * @return boolean|int Returns TRUE on success update, or INT on success insert. FALSE on error
      */
     public function AutoInsertUpdate($tableName, $valuesArray, $whereArray) {
         $this->ResetError();
@@ -192,7 +192,7 @@ class MySQL {
                 return $quote . $columns . $quote;
 
             default:
-                return false;
+                return "";
 
         }
     }
@@ -340,7 +340,7 @@ class MySQL {
     /**
      * Close current MySQL connection
      *
-     * @return object Returns TRUE on success or FALSE on error
+     * @return boolean Returns TRUE on success or FALSE on error
      */
     public function Close() {
         $this->ResetError();
@@ -414,7 +414,7 @@ class MySQL {
     /**
      * Returns the last MySQL error as text
      *
-     * @return string Error text from last known error or FALSE if no errors happened
+     * @return string|boolean Error text from last known error or FALSE if no errors happened
      */
     public function Error() {
         $error = $this->error_desc;
@@ -435,7 +435,7 @@ class MySQL {
     /**
      * Returns the last MySQL error as a number
      *
-     * @return integer Error number from last known error or FALSE if no errors happened
+     * @return integer|boolean Error number from last known error or FALSE if no errors happened
      */
     public function ErrorNumber() {
         if (strlen($this->error_desc) > 0) {
@@ -487,7 +487,7 @@ class MySQL {
      *
      * @param string $table Table name
      * @param string $resultType (Optional) The type of array result. Can be: NUM, ASSOC, BOTH
-     * @return array An array that contains the column comments
+     * @return array|boolean An array that contains the column comments. FALSE on error
      */
     public function GetColumnComments($table, $resultType = "ASSOC") {
         if (!in_array($resultType, array("ASSOC", "NUM", "BOTH")))
@@ -524,7 +524,7 @@ class MySQL {
      *
      * @param string $table (Optional) If a table name is not specified, the
      *                      column count is returned from the last query
-     * @return integer The total count of columns
+     * @return integer|boolean The total count of columns. FALSE on error
      */
     public function GetColumnCount($table = "") {
         $this->ResetError();
@@ -552,7 +552,7 @@ class MySQL {
      * @param string $column Column name or number (first column is 0)
      * @param string $table (Optional) If a table name is not specified, the
      *                      last returned records are used
-     * @return string MySQL data (field) type
+     * @return string|boolean MySQL data (field) type. FALSE on error
      */
     public function GetColumnDataType($column, $table = "") {
         $this->ResetError();
@@ -588,7 +588,7 @@ class MySQL {
      * @param string $column Column name
      * @param string $table (Optional) If a table name is not specified, the
      *                      last returned records are used.
-     * @return integer Column ID
+     * @return integer|boolean Retunrs column ID, or FALSE if not found
      */
     public function GetColumnID($column, $table = "") {
         $this->ResetError();
@@ -1535,7 +1535,7 @@ class MySQL {
      * @param array|string $sortColumns (Optional) Column or list of columns to sort by
      * @param boolean $sortAscending (Optional) TRUE for ascending; FALSE for descending
      *                               This only works if $sortColumns are specified
-     * @param integer/string $limit (Optional) The limit of rows to return
+     * @param integer|string $limit (Optional) The limit of rows to return
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function SelectRows($tableName, $whereArray = null, $columns = null,
