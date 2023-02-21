@@ -46,7 +46,7 @@ class MySQL {
     const SQLVALUE_Y_N = "y-n";
 
     // class-internal variables - do not change
-    public $mysql_link = 0;       // mysql link resource
+    public $mysql_link;       // mysql link resource
     private $active_row = -1;       // current row
     private $error_desc = "";       // last mysql error string
     private $error_number = 0;        // last mysql error number
@@ -56,7 +56,7 @@ class MySQL {
     private $last_sql = "";       // last mysql query
     private $time_diff = 0;        // holds the difference in time
     private $time_start = 0;        // start time for the timer
-    private $debug = false;    // debug mode (default OFF)
+    private $debug = "";    // debug mode (default OFF)
 
     /**
      * Determines if an error throws an exception
@@ -347,7 +347,7 @@ class MySQL {
         $this->active_row = -1;
 
         // Skip if not connected or already closed
-        if (!is_null($this->mysql_link))
+        if (!is_null($this->mysql_link) || empty($this->mysql_link))
             return true;
 
         $success = $this->Release();
@@ -991,7 +991,7 @@ class MySQL {
     /**
      * Determines if a valid connection to the database exists
      *
-     * @return boolean TRUE idf connectect or FALSE if not connected
+     * @return boolean TRUE if connectect or FALSE if not connected
      */
     public function IsConnected() {
         if (is_object($this->mysql_link)) {
@@ -1095,10 +1095,10 @@ class MySQL {
         // Open persistent or normal connection
         try {
             if ($pcon) {
-                $this->mysql_link = @mysqli_connect(
+                $this->mysql_link = @/** @scrutinizer ignore-call */  mysqli_connect(
                                 'p:' . $this->db_host, $this->db_user, $this->db_pass);
             } else {
-                $this->mysql_link = @mysqli_connect(
+                $this->mysql_link = @/** @scrutinizer ignore-call */  mysqli_connect(
                                 $this->db_host, $this->db_user, $this->db_pass);
             }
         } catch (mysqli_sql_exception $e) {
@@ -1148,7 +1148,7 @@ class MySQL {
         $this->ResetError();
         $this->last_sql = $sql;
 
-        if ($this->debug)
+        if (!empty($this->debug))
             file_put_contents($this->debug, date("Y-m-d H:i:s") . " : " . $sql . PHP_EOL, FILE_APPEND);
 
         try {
@@ -1332,9 +1332,8 @@ class MySQL {
         if (!is_object($this->last_result)) {
             $success = true;
         } else {
-            $success = @mysqli_free_result($this->last_result);
-            if (!$success)
-                $this->SetError();
+            @mysqli_free_result($this->last_result);
+            $success = true;
         }
         return $success;
     }
