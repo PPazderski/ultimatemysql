@@ -350,17 +350,17 @@ class MySQL {
         if (!is_null($this->mysql_link) || empty($this->mysql_link))
             return true;
 
-        $success = $this->Release();
-        if ($success) {
-            $success = @mysqli_close($this->mysql_link);
-            if (!$success) {
-                $this->SetError();
-            } else {
-                unset($this->last_sql);
-                unset($this->last_result);
-                unset($this->mysql_link);
-            }
+        $this->Release();
+        
+        $success = @mysqli_close($this->mysql_link);
+        if (!$success) {
+            $this->SetError();
+        } else {
+            unset($this->last_sql);
+            unset($this->last_result);
+            unset($this->mysql_link);
         }
+        
         return $success;
     }
 
@@ -506,13 +506,16 @@ class MySQL {
             } else {
                 $index = 0;
                 $columns = array();
-                // Fetchs the array to be returned (column 8 is field comment):
-                while ($array_data = mysqli_fetch_array($records)) {
-                    if ($resultType == "NUM" || $resultType == "BOTH")
-                        $columns[$index] = $array_data[8];
-                    if ($resultType == "ASSOC" || $resultType == "BOTH")
-                        $columns[$columnNames[$index]] = $array_data[8];
-                    $index++;
+                if (is_a($records, "mysqli_result"))
+                {
+                    // Fetchs the array to be returned (column 8 is field comment):
+                    while ($array_data = mysqli_fetch_array($records)) {
+                        if ($resultType == "NUM" || $resultType == "BOTH")
+                            $columns[$index] = $array_data[8];
+                        if ($resultType == "ASSOC" || $resultType == "BOTH")
+                            $columns[$columnNames[$index]] = $array_data[8];
+                        $index++;
+                    }
                 }
                 return $columns;
             }
@@ -538,8 +541,13 @@ class MySQL {
                 $this->SetError();
                 $result = false;
             } else {
-                $result = mysqli_field_count($this->mysql_link);
-                mysqli_free_result($records);
+                if (is_a($records, "mysqli_result"))
+                {
+                    $result = mysqli_field_count($this->mysql_link);
+                    mysqli_free_result($records);
+                }
+                else
+                    return false;
             }
         }
         return $result;
@@ -549,7 +557,7 @@ class MySQL {
      * This function returns the data type for a specified column. If
      * the column does not exists or no records exist, it returns FALSE
      *
-     * @param string $column Column name or number (first column is 0)
+     * @param string|int $column Column name or number (first column is 0)
      * @param string $table (Optional) If a table name is not specified, the
      *                      last returned records are used
      * @return string|boolean MySQL data (field) type. FALSE on error
@@ -562,7 +570,11 @@ class MySQL {
                     $field = mysqli_fetch_field_direct($this->last_result, $column);
                     return $field->type;
                 } else {
-                    $field = mysqli_fetch_field_direct($this->last_result, $this->GetColumnID($column));
+                    $columnID = $this->GetColumnID($column);
+                    if (!$columnID)
+                        return false;
+                    
+                    $field = mysqli_fetch_field_direct($this->last_result, $columnID);
                     return $field->type;
                 }
             } else {
@@ -572,7 +584,7 @@ class MySQL {
             if (is_numeric($column))
                 $column = $this->GetColumnName($column, $table);
             $result = mysqli_query($this->mysql_link, "SELECT " . $column . " FROM " . $table . " LIMIT 1");
-            if (mysqli_field_count($this->mysql_link) > 0) {
+            if (mysqli_field_count($this->mysql_link) > 0 && !is_bool($result)) {
                 $field = mysqli_fetch_field_direct($result, 0);
                 return $field->type;
             } else {
@@ -620,7 +632,7 @@ class MySQL {
      * @param string $column Column name
      * @param string $table (Optional) If a table name is not specified, the
      *                      last returned records are used.
-     * @return integer|boolena Field length or FALSE on error
+     * @return integer|boolean Field length or FALSE on error
      */
     public function GetColumnLength($column, $table = "") {
         $this->ResetError();
@@ -647,7 +659,7 @@ class MySQL {
                 $this->SetError();
                 return false;
             }
-            $field = mysqli_fetch_field_direct($records, 0);
+            $field = mysqli_fetch_field_direct(/** @scrutinizer ignore-type */ $records, 0);
             if (!$field) {
                 $this->SetError();
                 return false;
@@ -661,7 +673,7 @@ class MySQL {
      * This function returns the name for a specified column number. If
      * the index does not exists or no records exist, it returns FALSE
      *
-     * @param string $columnID Column position (0 is the first column)
+     * @param integer $columnID Column position (0 is the first column)
      * @param string $table (Optional) If a table name is not specified, the
      *                      last returned records are used.
      * @return integer Field Length
@@ -731,9 +743,10 @@ class MySQL {
                 $this->SetError();
                 $columns = false;
             } else {
-                while ($array_data = mysqli_fetch_array($result)) {
-                    $columns[] = $array_data[0];
-                }
+                if (is_a($result, "mysqli_result"))
+                    while ($array_data = mysqli_fetch_array($result)) {
+                        $columns[] = $array_data[0];
+                    }
             }
         }
 
@@ -749,7 +762,7 @@ class MySQL {
      * @param string $styleTable (Optional) Style information for the table
      * @param string $styleHeader (Optional) Style information for the header row
      * @param string $styleData (Optional) Style information for the cells
-     * @return string HTML containing a table with all records listed
+     * @return string|boolean HTML containing a table with all records listed or FALSE is no results
      */
     public function GetHTML($showCount = true, $styleTable = null, $styleHeader = null, $styleData = null) {
         if ($styleTable === null) {
@@ -867,9 +880,10 @@ class MySQL {
             $this->SetError();
             return FALSE;
         } else {
-            while ($array_data = mysqli_fetch_array($records)) {
-                $tables[] = $array_data[0];
-            }
+            if (is_a($records, "mysqli_result"))
+                while ($array_data = mysqli_fetch_array($records)) {
+                    $tables[] = $array_data[0];
+                }
 
             // Returns the array or NULL
             if (count($tables) > 0) {
@@ -1020,9 +1034,9 @@ class MySQL {
      */
     public function Kill($message = "") {
         if (strlen($message) > 0) {
-            exit($message);
+            die($message);
         } else {
-            exit($this->Error());
+            die($this->Error());
         }
     }
 
@@ -1087,7 +1101,7 @@ class MySQL {
             $this->db_pass = $password;
         if ($charset !== null)
             $this->db_charset = $charset;
-        if (is_bool($pcon))
+        if ($pcon)
             $this->db_pcon = $pcon;
 
         $this->active_row = -1;
@@ -1230,7 +1244,7 @@ class MySQL {
      * @param string $sql The query string should not end with a semicolon
      * @param integer $resultType (Optional) The type of array
      *                Values can be: MYSQLI_ASSOC, MYSQLI_NUM, MYSQLI_BOTH
-     * @return array An array containing the first row or FALSE if no row
+     * @return array|boolean An array containing the first row or FALSE if no row
      *               is returned from the query
      */
     public function QuerySingleRowArray($sql, $resultType = MYSQLI_BOTH) {
@@ -1264,9 +1278,9 @@ class MySQL {
      * in microseconds
      *
      * @param string $sql The query string should not end with a semicolon
-     * @return object PHP 'mysql result' resource object containing the records
-     *                on SELECT, SHOW, DESCRIBE or EXPLAIN queries and returns
-     *                TRUE or FALSE for all others i.e. UPDATE, DELETE, DROP
+     * @return object|boolean PHP 'mysql result' resource object containing the records
+     *                        on SELECT, SHOW, DESCRIBE or EXPLAIN queries and returns
+     *                        TRUE or FALSE for all others i.e. UPDATE, DELETE, DROP
      */
     public function QueryTimed($sql) {
         $this->TimerStart();
@@ -1329,10 +1343,8 @@ class MySQL {
      */
     public function Release() {
         $this->ResetError();
-        if (!is_object($this->last_result)) {
-            $success = true;
-        } else {
-            @mysqli_free_result($this->last_result);
+        if (is_object($this->last_result)) {
+            mysqli_free_result($this->last_result);
             $success = true;
         }
         return $success;
@@ -1452,7 +1464,7 @@ class MySQL {
      * specified row number and returns the result
      *
      * @param integer $row_number Row number
-     * @return object|boolean Fetched row as PHP object or FALSE on failure
+     * @return array|boolean Fetched row as PHP object or FALSE on failure
      */
     public function Seek($row_number) {
         $this->ResetError();
@@ -1718,7 +1730,8 @@ class MySQL {
                 }
                 break;
             default:
-                exit("ERROR: Invalid data type specified in SQLValue method");
+                //exit("ERROR: Invalid data type specified in SQLValue method");
+                $return_value = "";
         }
         return $return_value;
     }
@@ -1886,5 +1899,3 @@ class MySQL {
     }
 
 }
-
-?>
