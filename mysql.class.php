@@ -629,7 +629,7 @@ class MySQL {
     /**
      * This function returns the field length or returns FALSE on error
      *
-     * @param string $column Column name
+     * @param string|int $column Column name or ID
      * @param string $table (Optional) If a table name is not specified, the
      *                      last returned records are used.
      * @return integer|boolean Field length or FALSE on error
@@ -642,7 +642,7 @@ class MySQL {
             } else {
                 $columnID = $this->GetColumnID($column);
             }
-            if (!$columnID) {
+            if ($columnID === false) {
                 return false;
             } else {
                 $field = mysqli_fetch_field_direct($this->last_result, $columnID);
@@ -684,7 +684,7 @@ class MySQL {
         if (empty($table)) {
             if ($this->RowCount() > 0) {
                 $field = mysqli_fetch_field_direct($this->last_result, $columnID);
-                if (!$field) {
+                if (!is_object($field)) {
                     $result = false;
                     $this->SetError();
                 } else {
@@ -782,10 +782,11 @@ class MySQL {
         }
 
         if ($this->last_result) {
-            if ($this->RowCount() > 0) {
+            $rowCount = $this->RowCount();
+            if ($rowCount !== false && $rowCount>0) {
                 $html = "";
                 if ($showCount)
-                    $html = "Record Count: " . $this->RowCount() . "<br />\n";
+                    $html = "Record Count: " . $rowCount . "<br />\n";
                 $html .= "<table style=\"$tb\" cellpadding=\"2\" cellspacing=\"2\">\n";
                 $this->MoveFirst();
                 $header = false;
@@ -1092,15 +1093,14 @@ class MySQL {
 
         // Use defaults?
         if ($database !== null)
+        {
             $this->db_dbname = $database;
-        if ($server !== null)
             $this->db_host = $server;
-        if ($username !== null)
             $this->db_user = $username;
-        if ($password !== null)
             $this->db_pass = $password;
-        if ($charset !== null)
             $this->db_charset = $charset;
+        }
+        
         if ($pcon)
             $this->db_pcon = $pcon;
 

@@ -46,7 +46,9 @@ if ($db->Error()) $db->Kill();
 $db->Query("SELECT * FROM Test");
 
 // Let's show how many records were returned
-echo $db->RowCount() . " records returned.<br />\n<hr />\n";
+$RowCount = $db->RowCount();
+if ($RowCount)
+    echo $db->RowCount() . " records returned.<br />\n<hr />\n";
 
 // Loop through the records using the MySQL object (prefered)
 $db->MoveFirst();

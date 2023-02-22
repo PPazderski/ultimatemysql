@@ -59,7 +59,9 @@ if ($db->Query("SELECT * FROM Test")) {
 }
 
 // --- Getting the record count is easy -----------------------------
-echo "\n<p>Record Count: " . $db->RowCount() . "</p>\n";
+$rowCount = $db->RowCount();
+if ($rowCount !== false)
+    echo "\n<p>Record Count: " . $db->RowCount() . "</p>\n";
 
 
 // --- Loop through the records -------------------------------------
@@ -102,7 +104,7 @@ echo "Length: " . $db->GetColumnLength("Color", "Test") . "<br />\n";
 
 // --- Get a column's ordinal position (the column number) ----------
 $ColumnID = $db->GetColumnID("Age", "Test");
-if ($ColumnID)
+if ($ColumnID !== false)
     echo  $ColumnID."<br />\n";
 
 // --- Check for errors ---------------------------------------------
