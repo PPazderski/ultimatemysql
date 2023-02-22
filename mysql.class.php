@@ -566,12 +566,12 @@ class MySQL {
         $this->ResetError();
         if (empty($table)) {
             if ($this->RowCount() > 0) {
-                if (is_numeric($column)) {
+                if (is_int($column)) {
                     $field = mysqli_fetch_field_direct($this->last_result, $column);
                     return $field->type;
                 } else {
                     $columnID = $this->GetColumnID($column);
-                    if (!$columnID)
+                    if ($columnID === false)
                         return false;
                     
                     $field = mysqli_fetch_field_direct($this->last_result, $columnID);
@@ -581,7 +581,7 @@ class MySQL {
                 return false;
             }
         } else {
-            if (is_numeric($column))
+            if (is_int($column))
                 $column = $this->GetColumnName($column, $table);
             $result = mysqli_query($this->mysql_link, "SELECT " . $column . " FROM " . $table . " LIMIT 1");
             if (mysqli_field_count($this->mysql_link) > 0 && !is_bool($result)) {
@@ -637,7 +637,7 @@ class MySQL {
     public function GetColumnLength($column, $table = "") {
         $this->ResetError();
         if (empty($table)) {
-            if (is_numeric($column)) {
+            if (is_int($column)) {
                 $columnID = $column;
             } else {
                 $columnID = $this->GetColumnID($column);
@@ -646,7 +646,7 @@ class MySQL {
                 return false;
             } else {
                 $field = mysqli_fetch_field_direct($this->last_result, $columnID);
-                if (!$field) {
+                if (!is_object($field)) {
                     $this->SetError();
                     return false;
                 } else {
@@ -660,7 +660,7 @@ class MySQL {
                 return false;
             }
             $field = mysqli_fetch_field_direct(/** @scrutinizer ignore-type */ $records, 0);
-            if (!$field) {
+            if (!is_object($field)) {
                 $this->SetError();
                 return false;
             } else {
@@ -699,9 +699,9 @@ class MySQL {
                 $this->SetError();
                 $result = false;
             } else {
-                if (mysqli_field_count($this->mysql_link) > 0) {
+                if (mysqli_field_count($this->mysql_link) > 0 && is_a($records, 'mysqli_result')) {
                     $field = mysqli_fetch_field_direct($records, $columnID);
-                    if (!$field) {
+                    if (!is_object($field)) {
                         $result = false;
                         $this->SetError();
                     } else {
@@ -1345,9 +1345,8 @@ class MySQL {
         $this->ResetError();
         if (is_object($this->last_result)) {
             mysqli_free_result($this->last_result);
-            $success = true;
         }
-        return $success;
+        return true;
     }
 
     /**
@@ -1438,7 +1437,9 @@ class MySQL {
     /**
      * Returns the last query row count
      *
-     * @return integer|boolean Row count or FALSE on error
+     * @return mixed Row count or FALSE on error (If the number of affected rows
+     *               is greater than the maximum int value PHP_INT_MAX, the 
+     *               number of affected rows will be returned as a string.)
      */
     public function RowCount() {
         $this->ResetError();

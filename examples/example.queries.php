@@ -47,7 +47,7 @@ $values["Age"]  = MySQL::SQLValue(777, MySQL::SQLVALUE_NUMBER);
 $result = $db->InsertRow("Test", $values);
 
 // If we have an error
-if (! $result) {
+if ($result === false) {
 	// Show the error and kill the script
 	$db->Kill();
 } else {
@@ -59,7 +59,9 @@ if (! $result) {
 	$db->SelectRows("Test", $values);
 
 	// Show the results in an HTML table
-	echo $db->GetHTML();
+	$html = $db->GetHTML();
+        if ($html)
+            echo $html;
 }
 
 // =========================================================================
@@ -94,7 +96,7 @@ if (! $result) {
 // --------------------------------------------------------------------------
 
 // FYI: We can also shortcut and specify the "where" array in the call...
-if (! $db->UpdateRow("test", $values, array("TestID" => 1))) $db->Kill();
+if (! $db->UpdateRows("test", $values, array("TestID" => 1))) $db->Kill();
 
 // =========================================================================
 // Here's a standard SQL query INSERT

@@ -49,7 +49,11 @@ if ($db->Query($sql)) {
 // --- Query and show the data --------------------------------------
 // (Note: $db->Query also returns the result set)
 if ($db->Query("SELECT * FROM Test")) {
-    echo $db->GetHTML();
+    $html = $db->GetHTML();
+    if ($html)
+        echo $html;
+    else
+        echo "<p>No results</p>";
 } else {
     echo "<p>Query Failed</p>";
 }
@@ -67,7 +71,8 @@ while ($row = $db->Row()) {
 $db->MoveFirst();
 while (! $db->EndOfSeek()) {
     $row = $db->Row();
-    echo $row->Color . " - " . $row->Age . "<br />\n";
+    if ($row)
+        echo $row->Color . " - " . $row->Age . "<br />\n";
 }
 
 // --- Loop through the records with an index -----------------------
@@ -96,7 +101,9 @@ echo "Type: " . $db->GetColumnDataType("Color", "Test") . "<br />\n";
 echo "Length: " . $db->GetColumnLength("Color", "Test") . "<br />\n";
 
 // --- Get a column's ordinal position (the column number) ----------
-echo $db->GetColumnID("Age", "Test") . "<br />\n";
+$ColumnID = $db->GetColumnID("Age", "Test");
+if ($ColumnID)
+    echo  $ColumnID."<br />\n";
 
 // --- Check for errors ---------------------------------------------
 if ($db->Error()) {

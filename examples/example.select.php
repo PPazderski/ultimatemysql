@@ -43,7 +43,7 @@ if ($db->Error()) $db->Kill();
 // Or: if ($db->Error()) echo $db->Error();
 
 // Execute our query
-if (! $db->Query("SELECT * FROM Test")) echo $db->Error();
+$db->Query("SELECT * FROM Test");
 
 // Let's show how many records were returned
 echo $db->RowCount() . " records returned.<br />\n<hr />\n";
@@ -76,7 +76,9 @@ echo "<hr />\n"; // ---------------------------------------------------------
 
 // Now let's just show all the data as an HTML table
 // This method is great for testing or displaying simple results
-echo $db->GetHTML(false);
+$html = $db->GetHTML(false);
+if ($html)
+    echo $html;
 
 echo "<hr />\n"; // ---------------------------------------------------------
 
