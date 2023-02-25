@@ -41,6 +41,10 @@ final class QueryTest extends TestCase
         # 4
         $actual = $this->db->QueryArray("SELECT * FROM `test_table` WHERE `id` = 10");
         $this->assertIsArray($actual);
+        
+        # 5
+        $actual = $this->db->QueryArray("SELECT * FROM `invalid_table` WHERE `id` = 10");
+        $this->assertFalse($actual);        
     }
 
     public function testQuerySingleRow()
@@ -130,6 +134,11 @@ final class QueryTest extends TestCase
         # 2
         $actual = $this->db->InsertRow("NonExistentTable", array("key"=>MySQL::SQLValue("foo"), "value"=>MySQL::SQLValue("bar")), array("key"=>MySQL::SQLValue("foo")));
         $this->assertFalse($actual);
+        
+        # 3
+        $this->db->Close();
+        $actual = $this->db->InsertRow("NonExistentTable", array("key"=>MySQL::SQLValue("foo"), "value"=>MySQL::SQLValue("bar")), array("key"=>MySQL::SQLValue("foo")));
+        $this->assertFalse($actual);        
     }  
     
     public function testGetLastInsertId()
@@ -236,6 +245,10 @@ final class QueryTest extends TestCase
         
         # 4
         $actual = $this->db->HasRecords("SELECT `name` FROM `test_table` WHERE `id` = 100");
+        $this->assertFalse($actual);    
+        
+        # 5
+        $actual = $this->db->HasRecords("SELECT `name` FROM `invalid_table` WHERE `id` = 100");
         $this->assertFalse($actual);          
     }
 
@@ -351,9 +364,14 @@ final class QueryTest extends TestCase
         $this->assertFalse($actual);          
     }
     
-    public function testHasRowCount()
+    public function testRowCount()
     {
         # 1
+        $actual = $this->db->RowCount();
+        $this->assertFalse($actual);
+        
+        
+        # 2
         $expected = 1;
         
         $this->db->Query("SELECT `name` FROM `test_table` WHERE `id` = 1");
@@ -361,12 +379,14 @@ final class QueryTest extends TestCase
         
         $this->assertSame($expected, $actual);      
         
-        # 2
+        
+        # 3
         $this->db->Query("UPDATE `test_query` set `value`='baz' WHERE `key` = 'foo'");
         $actual = $this->db->RowCount();
         $this->assertFalse($actual);         
         
-        # 3
+        
+        # 4
         $this->db->Query("SELECT `name` FROM `test_table` WHERE `id` = 100");
         $actual = $this->db->RowCount();        
         $this->assertFalse($actual);        
@@ -374,9 +394,14 @@ final class QueryTest extends TestCase
     
     public function testTruncateTable()
     {
+        # 1
         $this->db->Query("CREATE TABLE IF NOT EXISTS `test_delete` (  `id` int NOT NULL,  `key` varchar(25) NOT NULL,  `value` varchar(50) NOT NULL)");
         $actual = $this->db->TruncateTable("test_delete");
         $this->assertTrue($actual);
+        
+        # 2
+        $actual = $this->db->TruncateTable("invalid_table");
+        $this->assertFalse($actual);        
     }
 
     public function testSelectDatabase()

@@ -98,5 +98,34 @@ final class SeekTest extends TestCase
 
         $this->assertSame($expected, $actual);
     }
-
+    
+    public function testBeginningOfSeekNoConnection()
+    {
+        $this->db->Close();
+        $this->db->Seek(0);
+        $this->assertFalse($this->db->BeginningOfSeek());        
+    }
+    
+    public function testEndOfSeekNoConnection()
+    {
+        $this->db->Close();
+        $this->db->Seek(0);
+        $this->assertFalse($this->db->EndOfSeek());        
+    }  
+    
+    public function testMoveFirstNoConnection()
+    {
+        $this->db->Close();
+        $this->db->Query("SELECT * FROM `test_table`");
+        $this->db->Seek(0);
+        $this->assertFalse($this->db->MoveFirst());        
+    }
+    
+    public function testMoveLastNoConnection()
+    {
+        $this->db->Close();
+        $this->db->Query("SELECT * FROM `test_table`");
+        $this->db->Seek(0);
+        $this->assertFalse($this->db->MoveLast());        
+    } 
 }

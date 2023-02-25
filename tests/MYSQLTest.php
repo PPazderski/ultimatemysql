@@ -52,4 +52,21 @@ final class MYSQLTest extends TestCase
         $this->assertTrue($db->Close());
     }   
     
+    public function testCanBeCreatedWithCharset(): void
+    {
+        $this->assertInstanceOf(
+            MySQL::class,
+            $db = new MySQL(true,"testdb","127.0.0.1","root","root","utf8mb4")
+        );
+        $this->assertTrue($db->isConnected());
+    }     
+    
+    public function testReleaseConnection(): void
+    {
+        $this->assertInstanceOf(
+            MySQL::class,
+            $db = new MySQL(true,"testdb","127.0.0.1","root","root","utf8mb4")
+        );
+        $this->assertTrue($db->Release());
+    }     
 }

@@ -347,7 +347,7 @@ class MySQL {
         $this->active_row = -1;
 
         // Skip if not connected or already closed
-        if (!is_null($this->mysql_link) || empty($this->mysql_link))
+        if (!isset($this->mysql_link) || is_null($this->mysql_link))
             return true;
 
         $this->Release();
@@ -494,9 +494,15 @@ class MySQL {
             return false;
 
         $this->ResetError();
-        $records = mysqli_query($this->mysql_link, "SHOW FULL COLUMNS FROM " . $table);
+        $records = false;
+        
+        try {
+            $records = mysqli_query($this->mysql_link, "SHOW FULL COLUMNS FROM " . $table);
+        } catch (mysqli_sql_exception $e) {
+            $this->SetError($e->getMessage(), $e->getCode());
+        }
+                    
         if (!$records) {
-            $this->SetError();
             return false;
         } else {
             // Get the column names
@@ -536,9 +542,16 @@ class MySQL {
             if (!$result)
                 $this->SetError();
         } else {
-            $records = mysqli_query($this->mysql_link, "SELECT * FROM " . $table . " LIMIT 1");
+            
+            try {
+                $records = mysqli_query($this->mysql_link, "SELECT * FROM " . $table . " LIMIT 1");
+            } catch (mysqli_sql_exception $e) {
+                $this->SetError($e->getMessage(), $e->getCode());
+                $records = false;
+            } 
+            
             if (!$records) {
-                $this->SetError();
+                $this->SetError("GetColumnCount returns no records");
                 $result = false;
             } else {
                 if (is_a($records, "mysqli_result"))
@@ -654,9 +667,15 @@ class MySQL {
                 }
             }
         } else {
+            
+            try {
             $records = mysqli_query($this->mysql_link, "SELECT " . $column . " FROM " . $table . " LIMIT 1");
+            } catch (mysqli_sql_exception $e) {
+                $this->SetError($e->getMessage(), $e->getCode());
+                $records = false;
+            } 
+            
             if (!$records) {
-                $this->SetError();
                 return false;
             }
             $field = mysqli_fetch_field_direct(/** @scrutinizer ignore-type */ $records, 0);
@@ -694,12 +713,18 @@ class MySQL {
                 $result = false;
             }
         } else {
-            $records = mysqli_query($this->mysql_link, "SELECT * FROM " . $table . " LIMIT 1");
+            
+            try {
+                $records = mysqli_query($this->mysql_link, "SELECT * FROM " . $table . " LIMIT 1");
+            } catch (mysqli_sql_exception $e) {
+                $this->SetError($e->getMessage(), $e->getCode());
+                $records = false;
+            } 
+            
             if (!$records) {
-                $this->SetError();
                 $result = false;
             } else {
-                if (mysqli_field_count($this->mysql_link) > 0 && is_a($records, 'mysqli_result')) {
+                if (mysqli_field_count($this->mysql_link) > 0 && is_a($records, 'mysqli_result') && $columnID<=mysqli_field_count($this->mysql_link)) {
                     $field = mysqli_fetch_field_direct($records, $columnID);
                     if (!is_object($field)) {
                         $result = false;
@@ -738,9 +763,15 @@ class MySQL {
                 }
             }
         } else {
-            $result = mysqli_query($this->mysql_link, "SHOW COLUMNS FROM " . $table);
+            
+            try {
+                $result = mysqli_query($this->mysql_link, "SHOW COLUMNS FROM " . $table);
+            } catch (mysqli_sql_exception $e) {
+                $this->SetError($e->getMessage(), $e->getCode());
+                $result = false;
+            } 
+            
             if (!$result) {
-                $this->SetError();
                 $columns = false;
             } else {
                 if (is_a($result, "mysqli_result"))
@@ -876,9 +907,13 @@ class MySQL {
         $tables = array();
         
         // Query to get the tables in the current database:
-        $records = mysqli_query($this->mysql_link, "SHOW TABLES");
+        if ($this->IsConnected())
+            $records = mysqli_query($this->mysql_link, "SHOW TABLES");
+        else
+            $records = false;
+            
         if (!$records) {
-            $this->SetError();
+            $this->SetError("No tables found");
             return FALSE;
         } else {
             if (is_a($records, "mysqli_result"))
@@ -1009,7 +1044,7 @@ class MySQL {
      * @return boolean TRUE if connectect or FALSE if not connected
      */
     public function IsConnected() {
-        if (is_object($this->mysql_link)) {
+        if (isset($this->mysql_link) && is_object($this->mysql_link)) {
             return true;
         } else {
             return false;
@@ -1165,6 +1200,13 @@ class MySQL {
         if (!empty($this->debug))
             file_put_contents($this->debug, date("Y-m-d H:i:s") . " : " . $sql . PHP_EOL, FILE_APPEND);
 
+        if (!$this->IsConnected())
+        {
+            $this->SetError("No connection", -1);
+            return false;
+        }
+            
+        
         try {
             $this->last_result = @mysqli_query($this->mysql_link, $sql);
         } catch (mysqli_sql_exception $e) {
@@ -1345,6 +1387,7 @@ class MySQL {
         $this->ResetError();
         if (is_object($this->last_result)) {
             mysqli_free_result($this->last_result);
+            $this->last_result = false;
         }
         return true;
     }
@@ -1898,5 +1941,4 @@ class MySQL {
             }
         }
     }
-
 }

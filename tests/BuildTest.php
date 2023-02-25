@@ -35,6 +35,17 @@ final class BuildTest extends TestCase
         $this->assertSame($expected, $actual);
     }
     
+    public function testBuildSqlSelectWithAllParameters()
+    {
+        $expected = "SELECT `id` FROM `test_table` WHERE `name` = 'Violet' AND `value` = 777 ORDER BY `id` ASC LIMIT 1";
+    
+        $values["name"] = MySQL::SQLValue("Violet");
+        $values["value"] = MySQL::SQLValue(777, MySQL::SQLVALUE_NUMBER);
+        $actual = MySQL::BuildSQLSelect("test_table", $values, 'id', 'id', "ASC", 1);
+        
+        $this->assertSame($expected, $actual);
+    }    
+    
     public function testBuildSqlUpdate()
     {
         $expected = "UPDATE `test_table` SET `name` = 'Violet', `value` = 777 WHERE `id` = 10";
@@ -66,6 +77,36 @@ final class BuildTest extends TestCase
         $actual = MySQL::BuildSQLWhereClause($where);
         
         $this->assertSame($expected, $actual);
+        
+        
+        # 3
+        $expected = " AND `name` IS NULL";
+        
+        $where["name"] = null;
+        $actual = MySQL::BuildSQLWhereClause($where);
+        
+        $this->assertSame($expected, $actual); 
+        
+        
+        # 4
+        $expected = "";
+        
+        $where = array();
+        
+        $actual = MySQL::BuildSQLWhereClause($where);
+        
+        $this->assertSame($expected, $actual);       
+        
+        
+        # 5
+        $expected = " WHERE `abc` = 2 AND 1";
+        
+        $where["abc"] = 2;
+        $where[1] = 1;
+        
+        $actual = MySQL::BuildSQLWhereClause($where);
+        
+        $this->assertSame($expected, $actual);          
     }    
 
 }
