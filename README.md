@@ -2,10 +2,10 @@
 MySQL database access wrapper compatible with PHP 8
 
 Based on the excellent work of Jeff Williams
-https://web.archive.org/web/20160627050444/https://www.phpclasses.org/package/3698-PHP-MySQL-database-access-wrapper.html
+https://www.phpclasses.org/package/3698-PHP-MySQL-database-access-wrapper.html
 
 ### Why this repository
-Despite it is being used by fortune 500 companies [[source](https://web.archive.org/web/20160116102101/https://www.phpclasses.org/discuss/package/3698/thread/72/)], the script isn't update since 16/08/2013 (almost 10 years!), so i thinked to create this repository with the aim of making it compatible with PHP 8, and being able to use it for another 10 years (i hope!).
+Despite it is being used by fortune 500 companies [[source](https://www.phpclasses.org/discuss/package/3698/thread/72/)], the script isn't update since 16/08/2013 (almost 10 years!), so i thinked to create this repository with the aim of making it compatible with PHP 8, and being able to use it for another 10 years (i hope!).
 
 ## How to get started
 It's a very simple database access wrapper, well documented and safe against SQL injection hacks!
