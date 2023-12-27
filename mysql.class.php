@@ -400,7 +400,7 @@ class MySQL {
     public function EndOfSeek() {
         $this->ResetError();
         if ($this->IsConnected()) {
-            if ($this->active_row >= ($this->RowCount() - 1)) {
+            if ($this->active_row >= ($this->RowCount())) {
                 return true;
             } else {
                 return false;
@@ -1514,6 +1514,9 @@ class MySQL {
         $this->ResetError();
         $row_count = $this->RowCount();
         if (!$row_count) {
+            return false;
+        } elseif ($row_number == $row_count) {
+            $this->active_row = $row_count;
             return false;
         } elseif ($row_number >= $row_count) {
             $this->SetError("Seek parameter is greater than the total number of rows", -1);
