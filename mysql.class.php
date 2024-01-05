@@ -326,7 +326,7 @@ class MySQL {
                 }
             } else {
                 if (is_null($value)) {
-                    $where = " AND `" . $key . "` IS NULL";
+                    $where .= " AND `" . $key . "` IS NULL";
                 } else if (is_string($key)) {
                     $where .= " AND `" . $key . "` = " . $value;
                 } else {
