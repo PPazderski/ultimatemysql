@@ -33,6 +33,17 @@ final class BuildTest extends TestCase
         $actual = MySQL::BuildSQLSelect("test_table", $values);
         
         $this->assertSame($expected, $actual);
+
+
+        $expected = "SELECT * FROM `test_table` WHERE `id` = NULL AND `name` IS NULL AND `value` = 'foo'";
+
+        $values = [];
+        $values['id'] = MySQL::SQLValue(null);
+        $values['name'] = null;
+        $values['value'] = MySQL::SQLValue('foo', MySQL::SQLVALUE_TEXT);
+        $actual = MySQL::BuildSQLSelect('test_table', $values);
+
+        $this->assertSame($expected, $actual);
     }
     
     public function testBuildSqlSelectWithAllParameters()
@@ -55,6 +66,17 @@ final class BuildTest extends TestCase
         $filter["id"] = MySQL::SQLValue(10, MySQL::SQLVALUE_NUMBER);
         $actual = MySQL::BuildSQLUpdate("test_table", $values, $filter);
         
+        $this->assertSame($expected, $actual);
+
+
+        $expected = "UPDATE `test_table` SET `name` = 'Violet', `value` = NULL WHERE `id` = 10 AND `name` IS NULL";
+
+        $values["name"] = MySQL::SQLValue("Violet");
+        $values["value"] = MySQL::SQLValue(null);
+        $filter["id"] = MySQL::SQLValue(10, MySQL::SQLVALUE_NUMBER);
+        $filter["name"] = null;
+        $actual = MySQL::BuildSQLUpdate("test_table", $values, $filter);
+
         $this->assertSame($expected, $actual);
     }
     
@@ -80,7 +102,7 @@ final class BuildTest extends TestCase
         
         
         # 3
-        $expected = " AND `name` IS NULL";
+        $expected .= " AND `name` IS NULL";
         
         $where["name"] = null;
         $actual = MySQL::BuildSQLWhereClause($where);

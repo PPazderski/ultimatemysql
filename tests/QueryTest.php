@@ -45,6 +45,16 @@ final class QueryTest extends TestCase
         # 5
         $actual = $this->db->QueryArray("SELECT * FROM `invalid_table` WHERE `id` = 10");
         $this->assertFalse($actual);        
+
+        # 6
+        $expected = array(array("id"=>"3", "name"=>"John3", "data"=>"2024-01-04", "value"=>null));
+        $actual = $this->db->QueryArray("SELECT * FROM `test_table` WHERE `id` = 3", MYSQLI_ASSOC);
+        $this->assertEqualsCanonicalizing($expected, $actual);
+
+        # 7
+        $expected = array(array("0"=>"3", "1"=>"John3", "2"=>"2024-01-04", "3"=>null));
+        $actual = $this->db->QueryArray("SELECT * FROM `test_table` WHERE `id` = 3", MYSQLI_NUM);
+        $this->assertEqualsCanonicalizing($expected, $actual);
     }
 
     public function testQuerySingleRow()
@@ -100,6 +110,10 @@ final class QueryTest extends TestCase
         # 4
         $actual = $this->db->QuerySingleValue("SELECT * FROM `test_table` WHERE `id` = 10");
         $this->assertFalse($actual);
+
+        # 5
+        $actual = $this->db->QuerySingleValue("SELECT value FROM `test_table` WHERE `id` = 3");
+        $this->assertNull($actual);
     }
     
     public function testAutoInsertUpdate()
@@ -136,6 +150,10 @@ final class QueryTest extends TestCase
         $this->assertFalse($actual);
         
         # 3
+        $actual = $this->db->InsertRow("test_query", array("key"=>MySQL::SQLValue("abc"), "value"=>MySQL::SQLValue(null)));
+        $this->assertIsNumeric($actual);
+
+        # 4
         $this->db->Close();
         $actual = $this->db->InsertRow("NonExistentTable", array("key"=>MySQL::SQLValue("foo"), "value"=>MySQL::SQLValue("bar")), array("key"=>MySQL::SQLValue("foo")));
         $this->assertFalse($actual);        
@@ -168,14 +186,28 @@ final class QueryTest extends TestCase
     public function testUpdateRows()
     {
         # 1
-        $actual = $this->db->UpdateRows("test_query", array("key"=>MySQL::SQLValue("abc"), "value"=>MySQL::SQLValue("def")), array("id"=>MySQL::SQLValue("1")));
+        $actual = $this->db->UpdateRows("test_query", array("key"=>MySQL::SQLValue("abc"), "value"=>MySQL::SQLValue("def")), array("id"=>MySQL::SQLValue("-1")));
         $this->assertTrue($actual);
         
         # 2
         $actual = $this->db->UpdateRows("NonExistentTable", array("key"=>MySQL::SQLValue("foo"), "value"=>MySQL::SQLValue("bar")), array("id"=>MySQL::SQLValue("1")));
         $this->assertFalse($actual);
-    }      
-    
+
+        # 3
+        $expected = array("key"=>"123", "value"=>null);
+        $actual = $this->db->UpdateRows("test_query", array("key"=>MySQL::SQLValue("123"), "value"=>MySQL::SQLValue(null)), array("key"=>MySQL::SQLValue("foo")));
+        $this->assertTrue($actual);
+        $this->assertSame(1, $this->db->RowCount());
+        $actual = $this->db->QuerySingleRowArray("SELECT `key`, `value` FROM `test_query` WHERE `key` = '123'", MYSQLI_ASSOC);
+        $this->assertEqualsCanonicalizing($expected, $actual);
+
+        # 4
+        $expected = array("id"=>"1", "key"=>"123", "value"=>null);
+        $actual = $this->db->UpdateRows("test_query", array("key"=>MySQL::SQLValue("baz")), array(0=>'`key` IS NOT NULL', "value"=>null));
+        $this->assertTrue($actual);
+        //$this->assertSame(1, $this->db->RowCount()); TODO
+    }
+
     public function testDeleteRows()
     {
         # 1
@@ -204,6 +236,10 @@ final class QueryTest extends TestCase
         # 3
         $actual = $this->db->SelectRows("NonExistentTable", array("id"=>MySQL::SQLValue("1")));
         $this->assertFalse($actual);
+
+        # 4
+        $actual = $this->db->SelectRows("test_query", array("key"=>MySQL::SQLValue("abc"), "value"=>null));
+        $this->assertTrue($actual);
     }
 
     public function testSelectTable()
