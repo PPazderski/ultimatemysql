@@ -65,7 +65,7 @@ final class SeekTest extends TestCase
     {
         # 1
         $this->db->Query("SELECT * FROM `test_table`");
-        $this->db->Seek(self::$testTableRows - 1);
+        $this->db->Seek(self::$testTableRows);
         $this->assertTrue($this->db->EndOfSeek());
 
         # 2
@@ -146,7 +146,7 @@ final class SeekTest extends TestCase
             $this->db->Row();
             $i++;
         }
-        $this->assertSame(2, $i);
+        $this->assertSame(self::$testTableRows, $i);
     }
 
 }
