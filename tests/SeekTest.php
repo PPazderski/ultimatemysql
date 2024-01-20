@@ -11,7 +11,7 @@ final class SeekTest extends TestCase
     {
         $this->db = new MySQL(true,"testdb","127.0.0.1","root","root");
     }
-    
+
     public function testSeek()
     {
         $expected = array("0"=>"2", "1"=>"John2", "2"=>"2022-06-01", "3"=>"Yellow");
@@ -65,7 +65,7 @@ final class SeekTest extends TestCase
     {
         # 1
         $this->db->Query("SELECT * FROM `test_table`");
-        $this->db->Seek(self::$testTableRows - 1);
+        $this->db->Seek(self::$testTableRows);
         $this->assertTrue($this->db->EndOfSeek());
 
         # 2
@@ -87,6 +87,7 @@ final class SeekTest extends TestCase
         $actual = $this->db->SeekPosition();
 
         $this->assertSame($expected, $actual);
+        $this->assertTrue($this->db->BeginningOfSeek());
     }
 
     public function testMoveLast()
@@ -99,30 +100,31 @@ final class SeekTest extends TestCase
         $actual = $this->db->SeekPosition();
 
         $this->assertSame($expected, $actual);
+        $this->assertFalse($this->db->EndOfSeek());
     }
-    
+
     public function testBeginningOfSeekNoConnection()
     {
         $this->db->Close();
         $this->db->Seek(0);
-        $this->assertFalse($this->db->BeginningOfSeek());        
+        $this->assertFalse($this->db->BeginningOfSeek());
     }
-    
+
     public function testEndOfSeekNoConnection()
     {
         $this->db->Close();
         $this->db->Seek(0);
-        $this->assertFalse($this->db->EndOfSeek());        
-    }  
-    
+        $this->assertFalse($this->db->EndOfSeek());
+    }
+
     public function testMoveFirstNoConnection()
     {
         $this->db->Close();
         $this->db->Query("SELECT * FROM `test_table`");
         $this->db->Seek(0);
-        $this->assertFalse($this->db->MoveFirst());        
+        $this->assertFalse($this->db->MoveFirst());
     }
-    
+
     public function testMoveLastNoConnection()
     {
         $this->db->Close();
@@ -130,4 +132,21 @@ final class SeekTest extends TestCase
         $this->db->Seek(0);
         $this->assertFalse($this->db->MoveLast());
     }
+
+    /**
+     * Test based on some real world code which worked in version 3.0
+     * and was broken with release 4.0.
+     */
+    public function testSeekLoop()
+    {
+        $this->db->Query("SELECT * FROM `test_table`");
+        $i = 0;
+        $this->db->MoveFirst();
+        while (!$this->db->EndOfSeek()) {
+            $this->db->Row();
+            $i++;
+        }
+        $this->assertSame(self::$testTableRows, $i);
+    }
+
 }
