@@ -5,6 +5,8 @@ final class SeekTest extends TestCase
 {
     protected $db;
 
+    private static int $testTableRows = 3;
+
     public function setUp(): void
     {
         $this->db = new MySQL(true,"testdb","127.0.0.1","root","root");
@@ -55,7 +57,7 @@ final class SeekTest extends TestCase
         $this->assertTrue($this->db->BeginningOfSeek());
 
         # 3
-        $this->db->Seek(5);
+        $this->db->Seek(20);
         $this->assertFalse($this->db->BeginningOfSeek());
     }
 
@@ -63,7 +65,7 @@ final class SeekTest extends TestCase
     {
         # 1
         $this->db->Query("SELECT * FROM `test_table`");
-        $this->db->Seek(1);
+        $this->db->Seek(self::$testTableRows - 1);
         $this->assertTrue($this->db->EndOfSeek());
 
         # 2
@@ -71,7 +73,7 @@ final class SeekTest extends TestCase
         $this->assertFalse($this->db->EndOfSeek());
 
         # 3
-        $this->db->Seek(5);
+        $this->db->Seek(20);
         $this->assertFalse($this->db->EndOfSeek());
     }
 
@@ -89,7 +91,7 @@ final class SeekTest extends TestCase
 
     public function testMoveLast()
     {
-        $expected = 1;
+        $expected = self::$testTableRows - 1;
 
         $this->db->Query("SELECT * FROM `test_table`");
         $this->db->MoveLast();
@@ -126,6 +128,6 @@ final class SeekTest extends TestCase
         $this->db->Close();
         $this->db->Query("SELECT * FROM `test_table`");
         $this->db->Seek(0);
-        $this->assertFalse($this->db->MoveLast());        
-    } 
+        $this->assertFalse($this->db->MoveLast());
+    }
 }

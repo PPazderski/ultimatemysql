@@ -5,18 +5,19 @@ USE `testdb`;
 CREATE TABLE `test_query` (
   `id` int NOT NULL,
   `key` varchar(25) NOT NULL,
-  `value` varchar(50) NOT NULL
+  `value` varchar(50)
 );
 
 CREATE TABLE `test_table` (
   `id` int NOT NULL,
   `name` varchar(25) NOT NULL COMMENT 'It contains the name',
   `date` date NOT NULL,
-  `value` varchar(15) NOT NULL
+  `value` varchar(15)
 );
 
 INSERT INTO `test_table` (`id`, `name`, `date`, `value`) VALUES (1, 'John', '2022-01-01', 'Red');
 INSERT INTO `test_table` (`id`, `name`, `date`, `value`) VALUES (2, 'John2', '2022-06-01', 'Yellow');
+INSERT INTO `test_table` (`id`, `name`, `date`, `value`) VALUES (3, 'John3', '2024-01-04', NULL);
 
 ALTER TABLE `test_query`
   ADD PRIMARY KEY (`id`);
@@ -28,4 +29,4 @@ ALTER TABLE `test_query`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `test_table`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
